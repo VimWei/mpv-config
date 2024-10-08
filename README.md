@@ -4,9 +4,8 @@ mpv.conf, input.conf and some lua scripts.
 
 ## input.conf
 
-* Cheatsheet: Quick access "Active key Bindings"
+* Cheatsheet: Toggleable Persistent Display of Active Key Bindings
     - hotkey: ?
-    - config: ? script-binding stats/display-page-4-toggle
     - ref: https://github.com/mpv-player/mpv/issues/14966
 
 ## mpv.conf
