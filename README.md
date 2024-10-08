@@ -17,21 +17,25 @@ mpv.conf, input.conf and some lua scripts.
     - --secondary-sub-pos=100
     - --secondary-sub-ass-override=scale
 
-## dualsubs-init.lua
+## dualsubs utils
+
+Following scripts are completely independent.
+
+### dualsubs-init.lua
 
 * Function: Automatically load dual subtitles on startup.
 * dualsubs-init.conf: Primary and secondary subtitle language preferences.
 
-## dualsubs-swap.lua
+### dualsubs-swap.lua
 
 * Function: Quickly swap positions of primary and secondary subtitles.
 * Hotkey: Alt + u
 
-## dualsubs-reload.lua
+### dualsubs-reload.lua
 
 * Automatically reload external subtitle when updated without changing the current subtitle display track.
 
-## dualsubs-creat.lua
+### dualsubs-creat.lua
 
 * Function:
     - Create bilingual ASS subtitles with pop movie style
