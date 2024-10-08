@@ -1,5 +1,8 @@
----dualsubs-reload.lua
----监测外部字幕更新，并重新加载，而不改变当前字幕的显示轨道
+-- dualsubs-reload.lua
+-- src: https://github.com/VimWei/mpv-config
+-- Function:
+    -- Monitor external subtitle updates and automatically reload
+    -- without changing the current subtitle display track
 
 local utils = require 'mp.utils'
 

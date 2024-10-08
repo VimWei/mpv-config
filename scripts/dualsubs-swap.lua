@@ -1,5 +1,7 @@
 -- dualsubs-swap.lua
--- 通过快捷键 Alt+u 快速交换主次字幕的位置
+-- src: https://github.com/VimWei/mpv-config
+-- Function: Quickly swap positions of primary and secondary subtitles
+-- Hotkey: Alt + u
 
 -- 获取当前选中的主字幕和副字幕
 function get_selected_subtitles()

@@ -1,5 +1,7 @@
 -- dualsubs-init.lua
--- 自动加载双字幕，并且可以定义主次字幕优先使用的语言
+-- src: https://github.com/VimWei/mpv-config
+-- Function: Automatically load dual subtitles on startup
+-- dualsubs-init.conf: Primary and secondary subtitle language preferences
 
 local options = {
     primary_langs = "zh,chs,chi,chinese",

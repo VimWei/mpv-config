@@ -1,7 +1,10 @@
--- Usage:
---    Shift + B - create bilingual subtitles (and automatically select as default subtitles with visibility set to true)
--- Note:
---    Uses currently selected primary and secondary subtitles, supporting both external and embedded subtitles.
+-- dualsubs-creat.lua
+-- src: https://github.com/VimWei/mpv-config
+-- Function:
+    -- Create bilingual ASS subtitles with pop movie style
+    -- Uses currently selected primary and secondary subtitles
+    -- Supports both external and embedded subtitles
+-- Hotkey: Shift + b
 
 -- 默认样式设置
 local default_secondary_style = "Arial,14,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,-1,0,0,0,100,100,0,0,1,1,0,2,1,1,6,1"
