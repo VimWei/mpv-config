@@ -55,15 +55,15 @@ function get_file_paths(video_filename)
     local json_file_path_from_config, text_file_path_from_config, output_srt_path_from_config = nil, nil, nil
 
     if opts.json_file then
-        json_file_path_from_config = utils.join_path(working_dir, string.format(opts.json_file, opts.json_file))
+        json_file_path_from_config = utils.join_path(working_dir, string.format(opts.json_file, base_filename))
     end
 
     if opts.text_file then
-        text_file_path_from_config = utils.join_path(working_dir, string.format(opts.text_file, opts.text_file))
+        text_file_path_from_config = utils.join_path(working_dir, string.format(opts.text_file, base_filename))
     end
 
     if opts.output_srt then
-        output_srt_path_from_config = utils.join_path(working_dir, string.format(opts.output_srt, opts.output_srt))
+        output_srt_path_from_config = utils.join_path(working_dir, string.format(opts.output_srt, base_filename))
     end
 
     if json_file_path_from_config then
