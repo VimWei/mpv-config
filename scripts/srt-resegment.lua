@@ -1,18 +1,88 @@
+-- srt-resegment.lua
+-- src: https://github.com/VimWei/mpv-config
+-- Function:
+    -- Resegment srt by synchronize plain text with whisper's word-level timestamps JSON
+-- Hotkey:
+    -- input.conf: Ctrl+r script-binding srt_resegment
+-- ref:
+    -- Python edition: https://github.com/VimWei/WhisperTranscriber
+
 local utils = require 'mp.utils'
 local options = require 'mp.options'
 
 local opts = {
-    json_file = "whisper_wordlevel_timestamps.json",
-    text_file = "srt_plain_text.txt",
-    output_srt = "output.srt"
+    json_file = "%s.json",
+    text_file = "%s.txt",
+    output_srt = "%s.srt"
 }
 
 options.read_options(opts, "srt-resegment")
 
+function get_file_name_without_ext(path)
+    if not path or path == "" then
+        log("Error: Empty path provided")
+        return ""
+    end
+
+    local base_filename = mp.get_property("filename/no-ext")
+    if not base_filename or base_filename == "" then
+        log("Error: Unable to get base filename")
+        return ""
+    end
+
+    log("Base filename without extension: " .. base_filename)
+
+    return base_filename
+end
+
+function get_file_paths(video_filename)
+    log("video_filename: " .. tostring(video_filename))
+    if not video_filename or video_filename == "" then
+        log("Error: video_filename is empty")
+        return nil, nil, nil
+    end
+
+    local working_dir = mp.get_property("working-directory")
+    log("working_dir: " .. tostring(working_dir))
+
+    local base_filename = get_file_name_without_ext(video_filename)
+    if base_filename == "" then
+        log("Error: Unable to get base filename")
+        return nil, nil, nil
+    end
+    log("base_filename: " .. tostring(base_filename))
+
+    local json_file_path_from_config, text_file_path_from_config, output_srt_path_from_config = nil, nil, nil
+
+    if opts.json_file then
+        json_file_path_from_config = utils.join_path(working_dir, string.format(opts.json_file, opts.json_file))
+    end
+
+    if opts.text_file then
+        text_file_path_from_config = utils.join_path(working_dir, string.format(opts.text_file, opts.text_file))
+    end
+
+    if opts.output_srt then
+        output_srt_path_from_config = utils.join_path(working_dir, string.format(opts.output_srt, opts.output_srt))
+    end
+
+    if json_file_path_from_config then
+        json_file_path = json_file_path_from_config
+    end
+
+    if text_file_path_from_config then
+        text_file_path = text_file_path_from_config
+    end
+
+    if output_srt_path_from_config then
+        output_srt_path = output_srt_path_from_config
+    end
+
+    return json_file_path, text_file_path, output_srt_path
+end
+
 function log(message)
     mp.msg.info(message)
-    -- 是否在OSD上显示消息
-    -- mp.osd_message(message, 3)
 end
 
 function strip_quotes(str)
@@ -39,8 +109,6 @@ function generate_srt(json_data, text)
         end
     end
 
-    -- log("Total words in JSON: " .. #json_all_words)
-
     local json_word_index = 1
     local matched_words_index = 1
     local previous_end_time = 0
@@ -50,9 +118,6 @@ function generate_srt(json_data, text)
         for word in line:gmatch("%S+") do
             table.insert(txt_words, word)
         end
-
-        -- log("Processing line: " .. line)
-        -- log("Words in line: " .. table.concat(txt_words, ", "))
 
         if #txt_words == 0 then
             goto continue
@@ -76,8 +141,6 @@ function generate_srt(json_data, text)
                 local clean_json_word = (json_word_info.word or ""):gsub("^%s+", ""):gsub("%s+$", ""):gsub("[%p%c]", ""):lower()
                 local clean_txt_word = txt_word:gsub("[%p%c]", ""):lower()
 
-                -- log("Comparing: '" .. clean_json_word .. "' with '" .. clean_txt_word .. "'")
-
                 if clean_json_word == clean_txt_word then
                     if start_time == nil then
                         start_time = json_word_info.start
@@ -85,7 +148,6 @@ function generate_srt(json_data, text)
                     end_time = json_word_info["end"]
                     table.insert(matched_words, txt_word)
                     matched = true
-                    -- log("Matched word: " .. txt_word)
                     matched_words_index = json_word_index + 1
                     break
                 else
@@ -128,49 +190,40 @@ function format_time(time_in_seconds)
 end
 
 function main()
-    local working_dir = mp.get_property("working-directory")
-    -- log("Working directory: " .. tostring(working_dir))
+    local video_filename = mp.get_property("filename")
+    local json_file_path, text_file_path, output_srt_path = get_file_paths(video_filename)
+    if not json_file_path or not text_file_path or not output_srt_path then
+        log("Error: Failed to get file paths")
+        return
+    end
 
-    local json_file_path = utils.join_path(working_dir, opts.json_file)
-    -- log("Full JSON file path: " .. json_file_path)
+    log("json_file_path: " .. tostring(json_file_path))
+    log("text_file_path: " .. tostring(text_file_path))
+    log("output_srt_path: " .. tostring(output_srt_path))
 
     local json_file, err
     for _, mode in ipairs({"r", "rb", "rt"}) do
         json_file, err = io.open(json_file_path, mode)
         if json_file then
-            -- log("Successfully opened JSON file with mode: " .. mode)
             break
         else
-            -- log("Failed to open JSON file with mode " .. mode .. ". Error: " .. tostring(err))
+            log("Failed to open JSON file with mode " .. mode .. ". Error: " .. tostring(err))
         end
     end
 
     if not json_file then
         log("Error: Cannot open JSON file: " .. json_file_path)
-        -- log("Error message: " .. tostring(err))
-        -- log("Current directory contents:")
-        local handle = io.popen("dir " .. utils.join_path(working_dir, "*.*"))
-        local result = handle:read("*a")
-        handle:close()
-        -- log(result)
         return
     end
 
     local json_content = json_file:read("*all")
     json_file:close()
 
-    -- log("JSON file content (first 100 characters):")
-    -- log(json_content:sub(1, 100))
-
     local json_data = utils.parse_json(json_content)
     if not json_data then
-        -- log("Error: Failed to parse JSON data")
+        log("Error: Failed to parse JSON data")
         return
     end
-
-    -- log("Text file path: " .. tostring(opts.text_file))
-    local text_file_path = utils.join_path(working_dir, opts.text_file)
-    -- log("Full text file path: " .. tostring(text_file_path))
 
     local text_file = io.open(text_file_path, "r")
     if not text_file then
@@ -182,7 +235,6 @@ function main()
 
     local srt_content = generate_srt(json_data, text)
 
-    local output_srt_path = utils.join_path(working_dir, opts.output_srt)
     local srt_file = io.open(output_srt_path, "w")
     if not srt_file then
         log("Error: Cannot create SRT file")
@@ -194,5 +246,4 @@ function main()
     log("SRT file has been generated: " .. output_srt_path)
 end
 
--- 注册一个可以被 input.conf 引用的命令
 mp.add_key_binding(nil, "srt_resegment", main)

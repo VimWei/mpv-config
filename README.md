@@ -42,3 +42,12 @@ Following scripts are completely independent.
     - Uses currently selected primary and secondary subtitles
     - Supports both external and embedded subtitles
 * Hotkey: Shift + b
+
+## srt-resegment
+
+* Function:
+    - Resegment srt by synchronize plain text with whisper's word-level timestamps JSON
+* Hotkey:
+    - input.conf: Ctrl+r script-binding srt_resegment
+* ref:
+    - Python edition: https://github.com/VimWei/WhisperTranscriber
