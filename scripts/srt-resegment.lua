@@ -130,7 +130,8 @@ function generate_srt(json_data, text)
         for _, txt_word in ipairs(txt_words) do
             local matched = false
 
-            while json_word_index <= #json_all_words do
+            -- while json_word_index <= #json_all_words do
+            while json_word_index <= #json_all_words and json_word_index <= matched_words_index + 20 do
                 local json_word_info = json_all_words[json_word_index]
                 if json_word_info == nil then
                     log("Warning: json_word_info is nil at index " .. json_word_index)
