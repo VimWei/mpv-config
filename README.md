@@ -50,4 +50,5 @@ Following scripts are completely independent.
 * Hotkey:
     - input.conf: Ctrl+r script-binding srt_resegment
 * ref:
-    - Python edition: https://github.com/VimWei/WhisperTranscriber
+    - https://github.com/VimWei/WhisperTranscriber
+    - WhisperTranscriber and python version of srt-resegment

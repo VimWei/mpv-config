@@ -30,27 +30,27 @@ function get_file_name_without_ext(path)
         return ""
     end
 
-    log("Base filename without extension: " .. base_filename)
+    -- log("Base filename without extension: " .. base_filename)
 
     return base_filename
 end
 
 function get_file_paths(video_filename)
-    log("video_filename: " .. tostring(video_filename))
+    -- log("video_filename: " .. tostring(video_filename))
     if not video_filename or video_filename == "" then
         log("Error: video_filename is empty")
         return nil, nil, nil
     end
 
     local working_dir = mp.get_property("working-directory")
-    log("working_dir: " .. tostring(working_dir))
+    -- log("working_dir: " .. tostring(working_dir))
 
     local base_filename = get_file_name_without_ext(video_filename)
     if base_filename == "" then
         log("Error: Unable to get base filename")
         return nil, nil, nil
     end
-    log("base_filename: " .. tostring(base_filename))
+    -- log("base_filename: " .. tostring(base_filename))
 
     local json_file_path_from_config, text_file_path_from_config, output_srt_path_from_config = nil, nil, nil
 
@@ -197,9 +197,9 @@ function main()
         return
     end
 
-    log("json_file_path: " .. tostring(json_file_path))
-    log("text_file_path: " .. tostring(text_file_path))
-    log("output_srt_path: " .. tostring(output_srt_path))
+    -- log("json_file_path: " .. tostring(json_file_path))
+    -- log("text_file_path: " .. tostring(text_file_path))
+    -- log("output_srt_path: " .. tostring(output_srt_path))
 
     local json_file, err
     for _, mode in ipairs({"r", "rb", "rt"}) do
