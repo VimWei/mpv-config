@@ -76,4 +76,4 @@ end
 
 if options.show_on_start == true then clock_show_hide() end
 
-mp.add_key_binding('/', 'clock-show-hide', clock_show_hide)
+mp.add_key_binding(nil, 'clock-show-hide', clock_show_hide)
