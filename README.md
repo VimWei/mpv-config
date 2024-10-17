@@ -37,8 +37,14 @@ Following scripts are completely independent.
 ## chapter-converter.lua
 
 * Function:
-    - Converts timestamps from YouTube format ("00:00 chapter title") to MPV chapter format (FFmpeg metadata).
-    - Input: Plain text file named "videoname.chapter"
+    - Converts timestamps from YouTube format to MPV chapter format (FFmpeg metadata).
+    - Input: Plain text file named "videoname.chapter", for example:
+        - 01:12:34.567 timestamp supports HH:MM:SS.mmm
+        - 01:12:34 or only HH:MM:SS
+        - 12:34.567 or only MM:SS.mmm
+        - 12:34 or only MM:SS
+        - 34.567 or only SS.mmm
+        - 34 or only SS
     - Output: "videoname.ext.ffmetadata"
 
 * Hotkey:
