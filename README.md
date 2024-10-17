@@ -17,7 +17,7 @@ mpv.conf, input.conf and some lua scripts.
     - --secondary-sub-pos=100
     - --secondary-sub-ass-override=scale
 
-## dualsubs utils
+## Lua scripts
 
 Following scripts are completely independent.
 
@@ -43,7 +43,7 @@ Following scripts are completely independent.
     - Supports both external and embedded subtitles
 * Hotkey: Shift + b
 
-## srt-resegment
+### srt-resegment.lua
 
 * Function:
     - Resegment srt by synchronize plain text with whisper's word-level timestamps JSON
@@ -52,3 +52,13 @@ Following scripts are completely independent.
 * ref:
     - https://github.com/VimWei/WhisperTranscriber
     - WhisperTranscriber and python version of srt-resegment
+
+### chapter-converter.lua
+
+* Function:
+    - convert format from youtube "timestamps chapter" to mpv chapter.
+* Hotkey:
+    - input.conf: Ctrl+y script-binding chapter-converter
+* Ref:
+    - loading/editing/adding/removing/saving/baking chapters
+    - https://github.com/mar04/chapters_for_mpv
