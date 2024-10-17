@@ -57,6 +57,8 @@ Following scripts are completely independent.
 
 * Function:
     - convert format from youtube "timestamps chapter" to mpv chapter.
+    - input: a "videoname.chapter" plain text such as "00:10 intro"
+    - output: videoname.ext.ffmetadata
 * Hotkey:
     - input.conf: Ctrl+y script-binding chapter-converter
 * Ref:

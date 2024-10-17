@@ -1,6 +1,9 @@
 -- chapter-converter.lua
+-- src: https://github.com/VimWei/mpv-config
 -- * Function:
 --     - convert format from youtube "timestamps chapter" to mpv chapter.
+--     - input: a "videoname.chapter" plain text such as "00:10 intro"
+--     - output: videoname.ext.ffmetadata
 -- * Hotkey:
 --     - input.conf: Ctrl+y script-binding chapter-converter
 -- * Ref:
@@ -8,6 +11,12 @@
 --     - https://github.com/mar04/chapters_for_mpv
 
 local utils = require 'mp.utils'
+
+function log(message)
+    mp.msg.info(message)
+    -- 是否在OSD上显示消息
+    mp.osd_message(message, 3)
+end
 
 function parse_time(time_str)
     local hours, minutes, seconds, milliseconds = 0, 0, 0, 0
@@ -125,7 +134,7 @@ function main()
     chapter_content:close()
     ffmetadata:close()
 
-    mp.msg.info("Successfully created ffmetadata file: " .. ffmetadata_file)
+    log("Successfully created ffmetadata file: " .. ffmetadata_file)
 end
 
 mp.add_key_binding(nil, "chapter-converter", main)
