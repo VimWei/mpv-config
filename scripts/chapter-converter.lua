@@ -23,37 +23,42 @@ function parse_time(time_str)
 
     -- 匹配时间格式
     local parts = {}
-    for part in string.gmatch(time_str, "([^:]+)") do
+    for part in string.gmatch(time_str, "([^:%.]+)") do
         table.insert(parts, part)
     end
 
     -- 处理不同的时间格式
-    if #parts == 3 then
-        -- 格式为 1:27:45
+    if #parts == 4 then
+        -- 格式为 1:27:45.200
         hours = tonumber(parts[1]) or 0
         minutes = tonumber(parts[2]) or 0
         seconds = tonumber(parts[3]) or 0
+        milliseconds = tonumber(parts[4]) or 0
+    elseif #parts == 3 then
+        if string.find(time_str, "%.") then
+            -- 格式为 1:27.200
+            minutes = tonumber(parts[1]) or 0
+            seconds = tonumber(parts[2]) or 0
+            milliseconds = tonumber(parts[3]) or 0
+        else
+            -- 格式为 1:27:45
+            hours = tonumber(parts[1]) or 0
+            minutes = tonumber(parts[2]) or 0
+            seconds = tonumber(parts[3]) or 0
+        end
     elseif #parts == 2 then
-        -- 格式为 1:27 或 1:27.123
-        minutes = tonumber(parts[1]) or 0
-        seconds = tonumber(parts[2]) or 0
-        if string.find(parts[2], "%.%d+") then
-            seconds = math.floor(seconds)
-            milliseconds = (seconds - math.floor(seconds)) * 1000
+        if string.find(time_str, "%.") then
+            -- 格式为 27.200
+            seconds = tonumber(parts[1]) or 0
+            milliseconds = tonumber(parts[2]) or 0
+        else
+            -- 格式为 1:27
+            minutes = tonumber(parts[1]) or 0
+            seconds = tonumber(parts[2]) or 0
         end
     elseif #parts == 1 then
-        -- 格式为 1:27.123 或 1:27
-        local time, fraction = time_str:match("(%d+:%d+)%.(%d+)")
-        if time and fraction then
-            minutes, seconds = time:match("(%d+):(%d+)")
-            minutes = tonumber(minutes) or 0
-            seconds = tonumber(seconds) or 0
-            milliseconds = tonumber(fraction) * 10 -- 将小数秒转换为毫秒
-        else
-            minutes, seconds = time_str:match("(%d+):(%d+)")
-            minutes = tonumber(minutes) or 0
-            seconds = tonumber(seconds) or 0
-        end
+        -- 格式为 27
+        seconds = tonumber(parts[1]) or 0
     end
 
     -- 计算总纳秒数
