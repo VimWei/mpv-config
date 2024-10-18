@@ -1,11 +1,12 @@
 -- chapter-converter.lua
 -- src: https://github.com/VimWei/mpv-config
 -- * Function:
---     - Converts timestamps from YouTube format ("00:00 chapter title") to MPV chapter format (FFmpeg metadata).
---     - Input: Plain text file named "videoname.chapter"
---     - Output: "videoname.ext.ffmetadata"
--- * Hotkey:
---     - input.conf: Ctrl+y script-binding chapter-converter
+--     - Converts chapter format between YouTube and mpv.
+--     - YouTube Chapter: "videoname.chapter" (e.g., "00:10 chapter title").
+--     - mpv Chapter: "videoname.ext.ffmetadata" (FFmpeg metadata standard).
+-- * Hotkey customize:
+--     - Ctrl+y       script-binding   youtube-to-mpv
+--     - Ctrl+Alt+y   script-binding   mpv-to-youtube
 -- * Ref:
 --     - adding/editing/removing/saving/loading chapters
 --     - https://github.com/mar04/chapters_for_mpv
@@ -66,7 +67,7 @@ function parse_time(time_str)
     return total_nanoseconds
 end
 
-function main()
+function convert_youtube_to_mpv()
     local video_path = mp.get_property("path")
     local video_dir, video_name = utils.split_path(video_path)
     local name_without_ext = string.gsub(video_name, "%.%w+$", "")
@@ -142,4 +143,80 @@ function main()
     log("Successfully created ffmetadata file: " .. ffmetadata_file)
 end
 
-mp.add_key_binding(nil, "chapter-converter", main)
+function convert_mpv_to_youtube()
+    local video_path = mp.get_property("path")
+    local video_dir, video_name = utils.split_path(video_path)
+    local name_without_ext = string.gsub(video_name, "%.%w+$", "")
+
+    local chapter_file = utils.join_path(video_dir, name_without_ext .. ".chapter")
+    local ffmetadata_file = video_path .. ".ffmetadata"
+
+    -- 检查 .ffmetadata 文件是否存在
+    local ffmetadata_file_info = utils.file_info(ffmetadata_file)
+    if not ffmetadata_file_info then
+        mp.msg.warn("FFmetadata file not found: " .. ffmetadata_file)
+        return
+    end
+
+    -- 读取 .ffmetadata 文件
+    local ffmetadata_content = io.open(ffmetadata_file, "r")
+    if not ffmetadata_content then
+        mp.msg.error("Could not open ffmetadata file: " .. ffmetadata_file)
+        return
+    end
+
+    -- 创建 .chapter 文件
+    local chapter_content = io.open(chapter_file, "w")
+    if not chapter_content then
+        mp.msg.error("Could not create chapter file: " .. chapter_file)
+        ffmetadata_content:close()
+        return
+    end
+
+    -- 解析 .ffmetadata 文件并写入 .chapter 文件
+    local in_chapter_section = false
+    local chapter_start_time = 0
+    local chapter_title = ""
+
+    for line in ffmetadata_content:lines() do
+        if line:match("%[CHAPTER%]") then
+            in_chapter_section = true
+        elseif in_chapter_section then
+            local start_time_str = line:match("START=(%d+)")
+            local title_str = line:match("title=(.*)")
+
+            if start_time_str then
+                chapter_start_time = tonumber(start_time_str)
+            elseif title_str then
+                chapter_title = title_str:match("Chapter %d+ (.+)")
+                if chapter_title then
+                    local formatted_start_time = format_time(chapter_start_time)
+                    chapter_content:write(formatted_start_time .. " " .. chapter_title .. "\n")
+                end
+                in_chapter_section = false
+            end
+        end
+    end
+
+    ffmetadata_content:close()
+    chapter_content:close()
+
+    log("Successfully created chapter file: " .. chapter_file)
+end
+
+function format_time(nanoseconds)
+    local total_seconds = math.floor(nanoseconds / 1e9)
+    local hours = math.floor(total_seconds / 3600)
+    local minutes = math.floor((total_seconds % 3600) / 60)
+    local seconds = total_seconds % 60
+    local milliseconds = math.floor((nanoseconds % 1e9) / 1e6)
+
+    if hours > 0 then
+        return string.format("%d:%02d:%02d.%03d", hours, minutes, seconds, milliseconds)
+    else
+        return string.format("%d:%02d.%03d", minutes, seconds, milliseconds)
+    end
+end
+
+mp.add_key_binding(nil, "youtube-to-mpv", convert_youtube_to_mpv)
+mp.add_key_binding(nil, "mpv-to-youtube", convert_mpv_to_youtube)
