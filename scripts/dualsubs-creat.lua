@@ -1,50 +1,29 @@
 -- dualsubs-creat.lua
--- src: https://github.com/VimWei/mpv-config
--- Function:
-    -- Create bilingual ASS subtitles with pop movie style
-    -- Uses currently selected primary and secondary subtitles
-    -- Supports both external and embedded subtitles
--- Hotkey: Shift + b
+-- * src: https://github.com/VimWei/mpv-config
+-- * Function:
+--     - Create bilingual ASS subtitles with pop movie style
+--     - Uses currently selected primary and secondary subtitles
+--     - Supports both external and embedded subtitles
+-- * Hotkey customize:
+--     - Shift+b   script-binding   create-bilingual-subtitles
 
--- 默认样式设置
-local default_secondary_style = "Arial,14,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,-1,0,0,0,100,100,0,0,1,1,0,2,1,1,6,1"
-local default_primary_style = "Arial,20,&H0080FFFF,&H000000FF,&H00000000,&H00000000,-1,0,0,0,100,100,1,0,1,1,0,2,1,1,6,1"
-
--- 读取配置文件
-local function read_config()
-    local config_path = mp.find_config_file("dualsubs-creat.conf")
-    if not config_path then return nil end
-
-    local config_file = io.open(config_path, "r")
-    if not config_file then return nil end
-
-    local config = {}
-    for line in config_file:lines() do
-        local key, value = line:match("^([%w_]+)%s*=%s*(.+)$")
-        if key and value then
-            config[key] = value
-        end
-    end
-    config_file:close()
-    return config
+function log(message)
+    mp.msg.info(message)
+    -- 是否在OSD上显示消息
+    mp.osd_message(message, 3)
 end
 
--- 获取样式设置
+-- 默认样式设置
+local options = {
+    primary_style = "华文细黑,20,&H0080FFFF,&H000000FF,&H00000000,&H00000000,-1,0,0,0,100,100,1,0,1,1,0,2,1,1,6,1",
+    secondary_style = "Arial,14,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,1,0,2,1,1,6,1"
+}
+
+local mp_options = require 'mp.options'
+mp_options.read_options(options, "dualsubs-creat")
+
 local function get_styles()
-    local config = read_config()
-    local secondary_style = default_secondary_style
-    local primary_style = default_primary_style
-
-    if config then
-        if config.secondary_style then
-            secondary_style = config.secondary_style
-        end
-        if config.primary_style then
-            primary_style = config.primary_style
-        end
-    end
-
-    return secondary_style, primary_style
+    return options.primary_style, options.secondary_style
 end
 
 function srt_time_to_seconds(time)
@@ -180,7 +159,7 @@ function write_bilingual_subtitles(subs_primary, subs_primary_start, subs_primar
 
     f:write("[V4+ Styles]\n")
     f:write("Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding\n")
-    local secondary_style, primary_style = get_styles()
+    local primary_style, secondary_style = get_styles()
     f:write(string.format("Style: Secondary,%s\n", secondary_style))
     f:write(string.format("Style: Primary,%s\n\n", primary_style))
 
@@ -263,12 +242,10 @@ function create_bilingual_subtitles()
     if ret then
         mp.commandv("sub-add", subtitles_filename)
         mp.set_property("sub-visibility", "yes")
-        mp.osd_message("Finished creating bilingual subtitles")
-        mp.msg.info("Bilingual subtitle created at: " .. subtitles_filename)
+        log("Finished creating bilingual subtitles")
     else
-        mp.osd_message("Failed to create bilingual subtitles")
-        mp.msg.error("Failed to create bilingual subtitles")
+        log("Failed to create bilingual subtitles")
     end
 end
 
-mp.add_key_binding("B", "create-bilingual-subtitles", create_bilingual_subtitles)
+mp.add_key_binding(nil, "create-bilingual-subtitles", create_bilingual_subtitles)
