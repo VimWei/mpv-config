@@ -234,7 +234,7 @@ function create_bilingual_subtitles()
     end
 
     -- 生成双语字幕文件
-    local subtitles_filename = mp.get_property("working-directory") .. "/" .. mp.get_property("filename/no-ext") .. "_bilingual.ass"
+    local subtitles_filename = mp.get_property("working-directory") .. "/" .. mp.get_property("filename/no-ext") .. ".bilingual.ass"
     local ret = write_bilingual_subtitles(subs_primary, subs_primary_start, subs_primary_end,
                                           subs_secondary, subs_secondary_start, subs_secondary_end,
                                           subtitles_filename)
