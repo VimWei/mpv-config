@@ -83,6 +83,8 @@ end
 
 function log(message)
     mp.msg.info(message)
+    -- 是否在OSD上显示消息
+    mp.osd_message(message, 3)
 end
 
 function strip_quotes(str)
@@ -244,7 +246,7 @@ function main()
     srt_file:write(srt_content)
     srt_file:close()
 
-    log("SRT file has been generated: " .. output_srt_path)
+    log("SRT file has been resegment.")
 end
 
 mp.add_key_binding(nil, "srt_resegment", main)
