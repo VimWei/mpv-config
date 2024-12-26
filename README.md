@@ -34,6 +34,15 @@ Following scripts are completely independent.
     - https://github.com/VimWei/WhisperTranscriber
     - WhisperTranscriber and python version of srt-resegment
 
+## srt-to-word-level-json.lua
+* Function:
+    - Convert YouTube auto-generated SRT to JSON with word-level timestamps.
+    - Calculate word-level timestamps using character length as a basis.
+* Hotkey:
+    - input.conf: Ctrl+e script-binding srt_to_word_level_json
+* ref:
+    - srt-resegment.lua: resegment srt by synchronize plain text with JSON
+
 ## chapter-converter.lua
 
 * Function:

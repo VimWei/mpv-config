@@ -1,13 +1,12 @@
 -- srt-to-word-level-json.lua
 -- src: https://github.com/VimWei/mpv-config
 -- Function:
-    -- Converting SRT to JSON with word-level timestamps
+    -- Convert YouTube auto-generated SRT to JSON with word-level timestamps.
     -- Calculate word-level timestamps using character length as a basis.
 -- Hotkey:
     -- input.conf: Ctrl+e script-binding srt_to_word_level_json
 -- ref:
-    -- srt-resegment.lua
-    -- Resegment srt by synchronize plain text with JSON
+    -- srt-resegment.lua: resegment srt by synchronize plain text with JSON
 
 local mp = require 'mp'
 local utils = require 'mp.utils'
@@ -23,37 +22,10 @@ function round(num)
     return math.floor(num * 1000 + 0.5) / 1000
 end
 
--- 检查文件是否存在
-function file_exists(file_path)
-    local file = io.open(file_path, "r")
-    if file then
-        file:close()
-        return true
-    else
-        return false
-    end
-end
-
--- 获取视频文件名（不带扩展名）
-function get_file_name_without_ext(path)
-    if not path or path == "" then
-        log("Error: Empty path provided")
-        return ""
-    end
-
+-- 获取输出 JSON 文件路径
+function get_output_json_path()
     local base_filename = mp.get_property("filename/no-ext")
     if not base_filename or base_filename == "" then
-        log("Error: Unable to get base filename")
-        return ""
-    end
-
-    return base_filename
-end
-
--- 获取输出 JSON 文件路径
-function get_output_json_path(video_filename)
-    local base_filename = get_file_name_without_ext(video_filename)
-    if base_filename == "" then
         log("Error: Unable to get base filename")
         return nil
     end
@@ -232,7 +204,7 @@ end
 function main()
 
     -- 获取输出 JSON 文件路径
-    local output_json_path = get_output_json_path(mp.get_property("filename"))
+    local output_json_path = get_output_json_path()
 
     -- 获取当前主字幕文件路径
     local sub_filename = mp.get_property("current-tracks/sub/external-filename")
@@ -255,7 +227,6 @@ function main()
     end
 
     -- 解析 SRT 内容并生成 JSON 数据
-    log("Starting SRT to JSON conversion.")
     local json_data = parse_srt(srt_content)
     if not json_data.segments or #json_data.segments == 0 then
         log("No segments found in the SRT file.")
@@ -263,6 +234,7 @@ function main()
     end
 
     -- 保存 JSON 数据到文件
+    log("Starting SRT to JSON conversion.")
     save_json(json_data, output_json_path)
 
     log("Successfully converted SRT to JSON.")
