@@ -95,6 +95,15 @@ function fix_backslashes(str)
     return str:gsub("\\", "/")
 end
 
+local function clean_word(word)
+    if tonumber(word) then
+        -- 如果是数字，直接返回
+        return tostring(word)
+    end
+    -- 非数字的情况，移除标点和控制字符，但保留数字
+    return word:gsub("^%s+", ""):gsub("%s+$", ""):gsub("[^%w%d]", ""):lower()
+end
+
 function generate_srt(json_data, text)
     local lines = {}
     for line in text:gmatch("[^\r\n]+") do
@@ -128,6 +137,8 @@ function generate_srt(json_data, text)
         local start_time = nil
         local end_time = nil
         local matched_words = {}
+        local last_valid_word = nil  -- 记录前一个有效词
+        local next_valid_word = nil  -- 记录后一个有效词
 
         for _, txt_word in ipairs(txt_words) do
             local matched = false
@@ -141,14 +152,41 @@ function generate_srt(json_data, text)
                     goto continue_inner
                 end
 
+                -- 更新前一个有效词
+                if json_word_info.start and json_word_info["end"] then
+                    last_valid_word = json_word_info
+                end
+
                 local clean_json_word = (json_word_info.word or ""):gsub("^%s+", ""):gsub("%s+$", ""):gsub("[%p%c]", ""):lower()
                 local clean_txt_word = txt_word:gsub("[%p%c]", ""):lower()
 
                 if clean_json_word == clean_txt_word then
-                    if start_time == nil then
-                        start_time = json_word_info.start
+                    -- 找到匹配后，寻找下一个有效词
+                    local next_index = json_word_index + 1
+                    while next_index <= #json_all_words do
+                        local next_word = json_all_words[next_index]
+                        if next_word and next_word.start and next_word["end"] then
+                            next_valid_word = next_word
+                            break
+                        end
+                        next_index = next_index + 1
                     end
-                    end_time = json_word_info["end"]
+
+                    -- 设置时间戳
+                    if json_word_info.start and json_word_info["end"] then
+                        -- 如果当前词有时间戳，直接使用
+                        if start_time == nil then
+                            start_time = json_word_info.start
+                        end
+                        end_time = json_word_info["end"]
+                    else
+                        -- 如果当前词没有时间戳，使用前后词的时间
+                        if start_time == nil then
+                            start_time = last_valid_word and last_valid_word["end"]
+                        end
+                        end_time = next_valid_word and next_valid_word.start
+                    end
+
                     table.insert(matched_words, txt_word)
                     matched = true
                     matched_words_index = json_word_index + 1
@@ -166,12 +204,12 @@ function generate_srt(json_data, text)
             end
         end
 
+        -- 如果仍然没有有效的时间戳，使用前一行的结束时间
         if start_time == nil then
             start_time = previous_end_time
         end
-
         if end_time == nil then
-            end_time = previous_end_time
+            end_time = start_time + 2  -- 给一个合理的默认持续时间
         end
 
         srt_content = srt_content .. line_id .. "\n" .. format_time(start_time) .. " --> " .. format_time(end_time) .. "\n" .. line .. "\n\n"
