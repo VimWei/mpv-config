@@ -32,7 +32,7 @@ Following scripts are completely independent.
     - input.conf: Ctrl+r script-binding srt_resegment
 * ref:
     - https://github.com/VimWei/WhisperTranscriber
-    - WhisperTranscriber and python version of srt-resegment
+    - https://github.com/VimWei/WhisperXTranscriber
 
 ## srt-to-word-level-json.lua
 * Function:
