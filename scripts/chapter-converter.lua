@@ -134,7 +134,7 @@ function convert_youtube_to_mpv()
             local video_duration_ns = mp.get_property_number("duration") * 1e9
             ffmetadata:write(string.format("END=%d\n", video_duration_ns))
         end
-        ffmetadata:write(string.format("title=Chapter %d %s\n", i, chapter.title))
+        ffmetadata:write(string.format("title=%s\n", chapter.title))
     end
 
     chapter_content:close()
@@ -188,7 +188,7 @@ function convert_mpv_to_youtube()
             if start_time_str then
                 chapter_start_time = tonumber(start_time_str)
             elseif title_str then
-                chapter_title = title_str:match("Chapter %d+ (.+)")
+                chapter_title = title_str
                 if chapter_title then
                     local formatted_start_time = format_time(chapter_start_time)
                     chapter_content:write(formatted_start_time .. " " .. chapter_title .. "\n")
@@ -212,9 +212,9 @@ function format_time(nanoseconds)
     local milliseconds = math.floor((nanoseconds % 1e9) / 1e6)
 
     if hours > 0 then
-        return string.format("%d:%02d:%02d.%03d", hours, minutes, seconds, milliseconds)
+        return string.format("%02d:%02d:%02d.%03d", hours, minutes, seconds, milliseconds)
     else
-        return string.format("%d:%02d.%03d", minutes, seconds, milliseconds)
+        return string.format("%02d:%02d.%03d", minutes, seconds, milliseconds)
     end
 end
 
