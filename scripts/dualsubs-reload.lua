@@ -92,18 +92,19 @@ end
 
 function check_sub_update()
     -- log("---- Checking subtitles for updates ----")
-    for _, sub in pairs(subs) do
+    for i = #subs, 1, -1 do
+        local sub = subs[i]
         local sub_info = utils.file_info(sub.path)
         if sub_info then
             if sub_info.mtime ~= sub.last_modified then
                 log(string.format("==== %s changed at %s ====", sub.filename, os.date("%Y-%m-%d %H:%M:%S", sub_info.mtime)))
                 sub.last_modified = sub_info.mtime
                 reload_subtitle(sub)
-                -- 更新字幕状态
                 update_external_subs()
             end
         else
             log(string.format("Failed to get file info for: %s", sub.filename))
+            table.remove(subs, i)
         end
     end
 end
