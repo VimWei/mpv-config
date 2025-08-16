@@ -58,7 +58,7 @@ end
 
 mp.add_key_binding('Ctrl+,', 'play-before-short', function() play_before(options.interval_short) end)
 mp.add_key_binding('Ctrl+.', 'play-after-short', function() play_after(options.interval_short) end)
-mp.add_key_binding('<', 'play-before-medium', function() play_before(options.interval_medium) end)
-mp.add_key_binding('>', 'play-after-medium', function() play_after(options.interval_medium) end)
+mp.add_key_binding('Alt+<', 'play-before-medium', function() play_before(options.interval_medium) end)
+mp.add_key_binding('Alt+>', 'play-after-medium', function() play_after(options.interval_medium) end)
 mp.add_key_binding('Ctrl+<', 'play-before-long', function() play_before(options.interval_long) end)
 mp.add_key_binding('Ctrl+>', 'play-after-long', function() play_after(options.interval_long) end)
