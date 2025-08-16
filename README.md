@@ -55,3 +55,17 @@ Following scripts are completely independent.
 * Ref:
     - loading/editing/adding/removing/saving/baking chapters
     - https://github.com/mar04/chapters_for_mpv
+
+## @python/mpvchapter/mpvchapter.py
+
+* Function:
+    - Automatically create video chapters by detecting silent audio segments.
+    - Uses FFmpeg for audio processing.
+* Features:
+    - Smart thresholding: Auto-adjusts silence detection to fit the video's audio characteristics.
+    - Highly Customizable: A `config.json` file allows for detailed adjustments.
+    - Batch Processing: Capable of handling multiple video files in one go.
+* Usage:
+    - Run the script via `python python/mpvchapter/mpvchapter.py`.
+* Ref:
+    - The script's own README at `python/mpvchapter/README.md` provides more details.

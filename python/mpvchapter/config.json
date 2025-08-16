@@ -1,0 +1,32 @@
+{
+    "input": {
+        "path": "./videos",
+        "pattern": "*.{mp4,mkv,avi,mov,wmv,flv,webm}",
+        "batch_mode": true
+    },
+    "output": {
+        "suffix": ".chapter",
+        "encoding": "utf-8"
+    },
+    "detection": {
+        "noise_threshold_db": -30,
+        "min_silence": 1.0,
+        "safety_ratio": 0.10,
+        "min_gap": 3.0,
+        "skip_head": 2.0,
+        "skip_tail": 2.0
+    },
+    "adaptive": {
+        "enabled": true,
+        "adaptive_ratio": 0.3
+    },
+    "chapters": {
+        "prefix": "Chapter",
+        "start_index": 1
+    },
+    "logging": {
+        "level": "INFO",
+        "format": "%(asctime)s - %(levelname)s - %(message)s",
+        "show_progress": true
+    }
+}
