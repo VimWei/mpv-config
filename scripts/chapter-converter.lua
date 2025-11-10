@@ -72,13 +72,25 @@ function convert_youtube_to_mpv()
     local video_dir, video_name = utils.split_path(video_path)
     local name_without_ext = string.gsub(video_name, "%.%w+$", "")
 
-    local chapter_file = utils.join_path(video_dir, name_without_ext .. ".chapter")
     local ffmetadata_file = video_path .. ".ffmetadata"
 
-    -- 检查 .chapter 文件是否存在
-    local chapter_file_info = utils.file_info(chapter_file)
-    if not chapter_file_info then
-        mp.msg.warn("Chapter file not found: " .. chapter_file)
+    -- 优先尝试带视频后缀名的 chapter 文件，如果不存在则尝试不带后缀名的（向后兼容）
+    local chapter_file_with_ext = utils.join_path(video_dir, video_name .. ".chapter")
+    local chapter_file_without_ext = utils.join_path(video_dir, name_without_ext .. ".chapter")
+    
+    local chapter_file = nil
+    local chapter_file_info = utils.file_info(chapter_file_with_ext)
+    if chapter_file_info then
+        chapter_file = chapter_file_with_ext
+    else
+        chapter_file_info = utils.file_info(chapter_file_without_ext)
+        if chapter_file_info then
+            chapter_file = chapter_file_without_ext
+        end
+    end
+
+    if not chapter_file then
+        mp.msg.warn("Chapter file not found: " .. chapter_file_with_ext .. " or " .. chapter_file_without_ext)
         return
     end
 
@@ -146,9 +158,9 @@ end
 function convert_mpv_to_youtube()
     local video_path = mp.get_property("path")
     local video_dir, video_name = utils.split_path(video_path)
-    local name_without_ext = string.gsub(video_name, "%.%w+$", "")
 
-    local chapter_file = utils.join_path(video_dir, name_without_ext .. ".chapter")
+    -- 输出带视频后缀名的 chapter 文件
+    local chapter_file = utils.join_path(video_dir, video_name .. ".chapter")
     local ffmetadata_file = video_path .. ".ffmetadata"
 
     -- 检查 .ffmetadata 文件是否存在

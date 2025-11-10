@@ -47,7 +47,7 @@ Following scripts are completely independent.
 
 * Function:
     - Converts chapter format between YouTube and mpv.
-    - YouTube Chapter: "videoname.chapter" (e.g., "00:10 chapter title").
+    - YouTube Chapter: "videoname.ext.chapter" (e.g., "00:10 chapter title").
     - mpv Chapter: "videoname.ext.ffmetadata" (FFmpeg metadata standard).
 * Hotkey customize:
     - Ctrl+y       script-binding   youtube-to-mpv
