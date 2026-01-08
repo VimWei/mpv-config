@@ -19,6 +19,22 @@ local function split_string(str, sep)
     return result
 end
 
+local function detect_subtitle_format(filename)
+    if not filename then
+        return nil
+    end
+    local ext = filename:match("%.([^%.]+)$")
+    if ext then
+        ext = ext:lower()
+        if ext == "srt" then
+            return "srt"
+        elseif ext == "vtt" then
+            return "vtt"
+        end
+    end
+    return nil
+end
+
 local function load_subtitle_and_secondary()
     local tracks_count = mp.get_property_number("track-list/count")
     -- mp.msg.info("Tracks count: " .. (tracks_count or "nil"))
@@ -34,13 +50,41 @@ local function load_subtitle_and_secondary()
             local track_type = mp.get_property(string.format("track-list/%d/type", i-1))
             local track_lang = mp.get_property(string.format("track-list/%d/lang", i-1))
             local track_id = mp.get_property(string.format("track-list/%d/id", i-1))
+            local track_external_filename = mp.get_property(string.format("track-list/%d/external-filename", i-1))
+            local track_format = detect_subtitle_format(track_external_filename)
 
-            mp.msg.info(string.format("Track %d: type=%s, lang=%s, id=%s", i, track_type, track_lang, track_id))
+            mp.msg.info(string.format("Track %d: type=%s, lang=%s, id=%s, format=%s", i, track_type, track_lang, track_id, track_format or "unknown"))
 
             if type(track_type) == "string" and track_type == "sub" then
-                table.insert(subs, {id = track_id, lang = track_lang, index = i})
+                table.insert(subs, {id = track_id, lang = track_lang, index = i, format = track_format})
             end
         end
+    end
+
+    -- 1.5. 如果存在 SRT 字幕，过滤掉所有 VTT 字幕
+    local has_srt = false
+    for _, sub in ipairs(subs) do
+        if sub.format == "srt" then
+            has_srt = true
+            break
+        end
+    end
+
+    if has_srt then
+        local filtered_subs = {}
+        local filtered_count = 0
+        for _, sub in ipairs(subs) do
+            if sub.format ~= "vtt" then
+                table.insert(filtered_subs, sub)
+            else
+                filtered_count = filtered_count + 1
+                mp.msg.info(string.format("Filtered out VTT subtitle: track %d (sid %s, lang=%s)", sub.index, sub.id, sub.lang or "unknown"))
+            end
+        end
+        if filtered_count > 0 then
+            mp.msg.info(string.format("Filtered %d VTT subtitle(s) because SRT subtitle(s) exist", filtered_count))
+        end
+        subs = filtered_subs
     end
 
     -- 2. 按规则重新排列优先级
