@@ -24,25 +24,6 @@ Following scripts are completely independent.
     - Supports both external and embedded subtitles
 * Hotkey: Shift + b
 
-## srt-resegment.lua
-
-* Function:
-    - Resegment srt by synchronize plain text with whisper's word-level timestamps JSON
-* Hotkey:
-    - input.conf: Ctrl+r script-binding srt_resegment
-* ref:
-    - https://github.com/VimWei/WhisperTranscriber
-    - https://github.com/VimWei/WhisperXTranscriber
-
-## srt-to-word-level-json.lua
-* Function:
-    - Convert YouTube auto-generated SRT to JSON with word-level timestamps.
-    - Calculate word-level timestamps using character length as a basis.
-* Hotkey:
-    - input.conf: Ctrl+e script-binding srt_to_word_level_json
-* ref:
-    - srt-resegment.lua: resegment srt by synchronize plain text with JSON
-
 ## chapter-converter.lua
 
 * Function:
@@ -69,3 +50,24 @@ Following scripts are completely independent.
     - Run the script via `python python/mpvchapter/mpvchapter.py`.
 * Ref:
     - The script's own README at `python/mpvchapter/README.md` provides more details.
+
+## Archive Script
+
+### srt-resegment.lua
+
+* Function:
+    - Resegment srt by synchronize plain text with whisper's word-level timestamps JSON
+* Hotkey:
+    - input.conf: Ctrl+r script-binding srt_resegment
+* ref:
+    - https://github.com/VimWei/WhisperTranscriber
+    - https://github.com/VimWei/WhisperXTranscriber
+
+### srt-to-word-level-json.lua
+* Function:
+    - Convert YouTube auto-generated SRT to JSON with word-level timestamps.
+    - Calculate word-level timestamps using character length as a basis.
+* Hotkey:
+    - input.conf: Ctrl+e script-binding srt_to_word_level_json
+* ref:
+    - srt-resegment.lua: resegment srt by synchronize plain text with JSON
