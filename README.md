@@ -24,6 +24,11 @@ Following scripts are completely independent.
     - Supports both external and embedded subtitles
 * Hotkey: Shift + b
 
+## sub-pos-toggle.lua
+
+* Function: Toggle primary and secondary subtitle positions between bottom and top.
+* Hotkey: Alt + t
+
 ## chapter-converter.lua
 
 * Function:
