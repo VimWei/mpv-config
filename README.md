@@ -2,6 +2,17 @@
 
 Following scripts are completely independent.
 
+## touch.lua
+
+* Function: Touch control support for mpv via RDP.
+    - Tap gestures: Left 20% → sub-seek -1 or seek -5; Center 60% → play/pause; Right 20% → sub-seek +1 or seek +5.
+    - Swipe gestures: Horizontal drag → seek (proportional to duration); Vertical drag left half → playback speed; Vertical drag right half → volume.
+
+## dump-info.lua
+
+* Function: Dump file info (same as pressing I) to a text file next to the video.
+* Hotkey: Ctrl + I
+
 ## dualsubs-init.lua
 
 * Function: Automatically load dual subtitles on startup.
@@ -28,6 +39,16 @@ Following scripts are completely independent.
 
 * Function: Toggle primary and secondary subtitle positions between bottom and top.
 * Hotkey: Alt + t
+* Related: Alt + r / Alt + R to adjust secondary subtitle position up/down.
+
+## cycle-profiles.lua
+
+* Function: Cycle through window size/position profiles (autofit-max, autofit-large, autofit-normal, autofit-small, left-2/3, right-2/3).
+* Source: https://github.com/VimWei/mpv-config
+
+## context_menu.lua
+
+* Function: Default context menu of mpv (bundled since mpv 0.4.1).
 
 ## chapter-converter.lua
 
@@ -55,6 +76,10 @@ Following scripts are completely independent.
     - Run the script via `python python/mpvchapter/mpvchapter.py`.
 * Ref:
     - The script's own README at `python/mpvchapter/README.md` provides more details.
+
+## @python/video_reencoder/video_reencoder.py
+
+* Function: Batch re-encode video files using FFmpeg.
 
 ## Archive Script
 
