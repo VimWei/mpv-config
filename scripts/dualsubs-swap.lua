@@ -43,20 +43,20 @@ function swap_subtitles()
         -- 然后重新选择字幕，但交换它们的位置
         mp.set_property("sid", secondary_sub.id)
         mp.set_property("secondary-sid", primary_sub.id)
-        mp.osd_message(string.format("已交换字幕：主字幕 ID%s <-> 副字幕 ID%s",
-                                     secondary_sub.id, primary_sub.id))
+        -- mp.osd_message(string.format("已交换字幕：主字幕 ID%s <-> 副字幕 ID%s",
+        --                              secondary_sub.id, primary_sub.id))
     elseif primary_sub and not secondary_sub then
         -- 只有主字幕，将其移到副字幕
         mp.msg.info(string.format("Moving primary subtitle to secondary"))
         mp.set_property("sid", "no")
         mp.set_property("secondary-sid", primary_sub.id)
-        mp.osd_message(string.format("已移动：主字幕 ID%s -> 副字幕", primary_sub.id))
+        -- mp.osd_message(string.format("已移动：主字幕 ID%s -> 副字幕", primary_sub.id))
     elseif not primary_sub and secondary_sub then
         -- 只有副字幕，将其移到主字幕
         mp.msg.info(string.format("Moving secondary subtitle to primary"))
         mp.set_property("secondary-sid", "no")
         mp.set_property("sid", secondary_sub.id)
-        mp.osd_message(string.format("已移动：副字幕 ID%s -> 主字幕", secondary_sub.id))
+        -- mp.osd_message(string.format("已移动：副字幕 ID%s -> 主字幕", secondary_sub.id))
     else
         -- 没有任何字幕
         mp.msg.info("No subtitles available for swapping")
