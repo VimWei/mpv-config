@@ -37,7 +37,9 @@ if osd_bar_value ~= "no" and osd_level_value >= "1" then
 
 		--mp.add_periodic_timer需要写在最前面，在没有加载这个前调用osd_bar_show_forever:kill()等命令会让mpv崩溃
 		osd_bar_show_forever = mp.add_periodic_timer( osd_duration_value_second, function()
-					mp.command("osd-bar show-progress")
+					if not mp.get_property_bool("user-data/touch/gesture-active", false) then
+						mp.command("osd-bar show-progress")
+					end
 				--osd_bar_show_forever:resume()
 		end)
 
