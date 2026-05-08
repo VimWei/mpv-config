@@ -11,6 +11,9 @@ local last_check_time = 0
 local timer = nil
 local subs = {}
 local last_track_list = nil
+local track_list_debounce = nil
+local last_external_subs_state = nil
+local suppress_track_list_update = false
 
 function log(message)
     mp.msg.info(message)
@@ -18,7 +21,6 @@ function log(message)
 end
 
 function update_external_subs()
-    log("---- Updating external subtitles ----")
     local tracks = mp.get_property_native("track-list")
     local new_subs = {}
     local seen_paths = {}
@@ -62,14 +64,23 @@ function update_external_subs()
                 })
                 seen_paths[full_path] = true
                 external_subs_count = external_subs_count + 1
-                log(string.format("Found external subtitle %d: %s (ID: %s, Lang: %s, Status: %s)",
-                    external_subs_count, sub_filename, track.id, track.lang or "unknown", status))
             end
         end
     end
 
     subs = new_subs
-    log(string.format("Total external subtitles found: %d", external_subs_count))
+
+    -- 更新外部字幕状态快照，供 observer 判断是否有实际变化
+    local state = {}
+    for _, track in ipairs(tracks) do
+        if track.type == "sub" and track.external then
+            table.insert(state, track.id)
+        end
+    end
+    table.sort(state)
+    last_external_subs_state = state
+
+    log(string.format("Updated external subtitles: %d found", external_subs_count))
 end
 
 function has_track_list_changed(new_track_list)
@@ -97,6 +108,35 @@ function has_track_list_changed(new_track_list)
     return false
 end
 
+function has_external_subs_changed(track_list)
+    local state = {}
+    for _, track in ipairs(track_list) do
+        if track.type == "sub" and track.external then
+            table.insert(state, track.id)
+        end
+    end
+    table.sort(state)
+
+    if not last_external_subs_state then
+        last_external_subs_state = state
+        return true
+    end
+
+    if #state ~= #last_external_subs_state then
+        last_external_subs_state = state
+        return true
+    end
+
+    for i, id in ipairs(state) do
+        if id ~= last_external_subs_state[i] then
+            last_external_subs_state = state
+            return true
+        end
+    end
+
+    return false
+end
+
 function check_sub_update()
     -- log("---- Checking subtitles for updates ----")
     for i = #subs, 1, -1 do
@@ -104,10 +144,9 @@ function check_sub_update()
         local sub_info = utils.file_info(sub.path)
         if sub_info then
             if sub_info.mtime ~= sub.last_modified then
-                log(string.format("==== %s changed at %s ====", sub.filename, os.date("%Y-%m-%d %H:%M:%S", sub_info.mtime)))
+                log(string.format("Subtitle changed: %s", sub.filename))
                 sub.last_modified = sub_info.mtime
                 reload_subtitle(sub)
-                update_external_subs()
             end
         else
             log(string.format("Failed to get file info for: %s", sub.filename))
@@ -167,7 +206,7 @@ function reload_subtitle(found_sub)
     end
 
     -- 2. 重新加载字幕
-    log(string.format("Reloading subtitle: %s ...", found_sub.filename))
+    log(string.format("Reloading subtitle: %s", found_sub.filename))
     if found_sub then
         mp.commandv("sub-reload", found_sub.id)
 
@@ -189,10 +228,8 @@ function reload_subtitle(found_sub)
                         track_path = utils.join_path(video_dir, track_filename)
                     end
                 end
-                log(string.format("Comparing track path: %s with found_sub path: %s", track_path, found_sub.path))
                 if track_path == found_sub.path or track_filename == found_sub.filename then
                     new_sub_id = track.id
-                    log(string.format("Found new_sub_id: %s", new_sub_id))
                     break
                 end
             end
@@ -214,7 +251,6 @@ function reload_subtitle(found_sub)
             if original_secondary_sub_id then
                 mp.set_property_number("secondary-sid", original_secondary_sub_id)
             end
-            log("Reloaded subtitle is the primary subtitle, updated primary subtitle")
         elseif found_sub.filename == original_secondary_sub_filename then
             -- 如果是次字幕，重新设置主字幕和次字幕
             mp.set_property("sid", "no")
@@ -225,7 +261,6 @@ function reload_subtitle(found_sub)
             if new_sub_id then
                 mp.set_property_number("secondary-sid", new_sub_id)
             end
-            log("Reloaded subtitle is the secondary subtitle, updated secondary subtitle")
         else
             -- 如果既不是主字幕也不是次字幕，重置为原来的设置
             mp.set_property("sid", "no")
@@ -236,11 +271,7 @@ function reload_subtitle(found_sub)
             if original_secondary_sub_id then
                 mp.set_property_number("secondary-sid", original_secondary_sub_id)
             end
-            log("Reloaded subtitle is neither primary nor secondary, restored original settings")
         end
-
-        -- d. 记录字幕重新加载完成的日志
-        log(string.format("... Reloaded subtitle: %s", found_sub.path))
     else
         log(string.format("Failed to find track for subtitle: %s", found_sub.path))
     end
@@ -255,17 +286,30 @@ function adaptive_check_sub_update()
 end
 
 mp.register_event("file-loaded", function()
+    suppress_track_list_update = true
+    if track_list_debounce then
+        track_list_debounce:kill()
+    end
     log("File loaded, initializing subtitle watch")
     update_external_subs()
     if timer then
         timer:kill()
     end
     timer = mp.add_periodic_timer(1, adaptive_check_sub_update)
+    mp.add_timeout(0.5, function()
+        suppress_track_list_update = false
+    end)
 end)
 
 mp.observe_property("track-list", "native", function(name, value)
-    if has_track_list_changed(value) then
-        log("Track list changed, updating external subtitles")
-        update_external_subs()
+    if track_list_debounce then
+        track_list_debounce:kill()
     end
+    track_list_debounce = mp.add_timeout(1.0, function()
+        if suppress_track_list_update then return end
+        if has_external_subs_changed(value) then
+            log("Track list changed, updating external subtitles")
+            update_external_subs()
+        end
+    end)
 end)
